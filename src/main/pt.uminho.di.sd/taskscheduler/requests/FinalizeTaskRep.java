@@ -5,10 +5,11 @@ import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
 
-public class NewTaskRep implements CatalystSerializable {
+public class FinalizeTaskRep implements CatalystSerializable {
+
     public boolean success;
 
-    public NewTaskRep(boolean success) {
+    public FinalizeTaskRep(boolean success) {
         this.success = success;
     }
 

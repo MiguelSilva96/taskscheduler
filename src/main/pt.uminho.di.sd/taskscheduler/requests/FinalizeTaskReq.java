@@ -5,20 +5,20 @@ import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
 
-public class NewTaskRep implements CatalystSerializable {
-    public boolean success;
+public class FinalizeTaskReq implements CatalystSerializable {
+    public String finalizedTask;
 
-    public NewTaskRep(boolean success) {
-        this.success = success;
+    public FinalizeTaskReq(String finalizedTask) {
+        this.finalizedTask = finalizedTask;
     }
 
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
-        bufferOutput.writeBoolean(success);
+        bufferOutput.writeString(finalizedTask);
     }
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
-        this.success = bufferInput.readBoolean();
+        this.finalizedTask = bufferInput.readString();
     }
 }
