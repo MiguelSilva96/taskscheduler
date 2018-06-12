@@ -1,19 +1,22 @@
 package taskscheduler.client;
 
-import taskscheduler.common.Scheduler;
+import taskscheduler.common.Task;
 
-import java.rmi.Remote;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Client {
 
     public static void main (String[] args) {
+        Map<String, Task> tasks = new HashMap<>();
         int clientId = Integer.parseInt(args[0]);
         String groupName = args[1];
         RemoteScheduler scheduler = new RemoteScheduler(clientId, groupName);
         scheduler.addsNewTask("dar banho ao baião");
-        String taskToDo = scheduler.getTask();
-        System.out.println(taskToDo);
-        scheduler.setFinalizedTask(taskToDo);
+        Task taskToDo = scheduler.getTask();
+        tasks.put(taskToDo.getName(), taskToDo);
+        System.out.println(taskToDo.getName());
+        scheduler.setFinalizedTask(taskToDo.getUrl());
         scheduler.exit();
     }
 

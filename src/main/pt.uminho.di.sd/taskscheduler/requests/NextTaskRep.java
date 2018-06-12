@@ -4,23 +4,23 @@ import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
+import taskscheduler.common.Task;
 
 public class NextTaskRep implements CatalystSerializable {
 
-    public String task;
+    public Task task;
 
-    public NextTaskRep(String task) {
+    public NextTaskRep(Task task) {
         this.task = task;
     }
 
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
-        bufferOutput.writeString(task);
-
+        serializer.writeObject(task, bufferOutput);
     }
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
-        this.task = bufferInput.readString();
+        task = serializer.readObject(bufferInput);
     }
 }

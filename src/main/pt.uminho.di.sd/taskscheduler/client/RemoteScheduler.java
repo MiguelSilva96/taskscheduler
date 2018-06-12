@@ -7,6 +7,7 @@ import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
 import taskscheduler.common.Scheduler;
+import taskscheduler.common.Task;
 import taskscheduler.requests.*;
 
 import java.util.concurrent.CompletableFuture;
@@ -74,7 +75,7 @@ public class RemoteScheduler implements Scheduler {
         return rep.success;
     }
 
-    public String getTask() {
+    public Task getTask() {
         NextTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
@@ -85,7 +86,7 @@ public class RemoteScheduler implements Scheduler {
             rep = (NextTaskRep) comp.get();
         } catch (Exception e) {
             System.out.println("Error getting new task");
-            return "NONE";
+            return null;
         }
         return rep.task;
     }
