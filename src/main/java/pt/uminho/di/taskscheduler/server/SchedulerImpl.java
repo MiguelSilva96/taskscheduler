@@ -1,7 +1,6 @@
-package taskscheduler.server;
+package pt.uminho.di.taskscheduler.server;
 
-import spread.SpreadGroup;
-import taskscheduler.common.Task;
+import pt.uminho.di.taskscheduler.common.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;

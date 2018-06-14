@@ -1,6 +1,6 @@
-package taskscheduler.client;
+package pt.uminho.di.taskscheduler.client;
 
-import taskscheduler.common.Task;
+import pt.uminho.di.taskscheduler.common.Task;
 
 import java.util.HashMap;
 import java.util.Map;

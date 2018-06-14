@@ -1,4 +1,4 @@
-package taskscheduler.common;
+package pt.uminho.di.taskscheduler.common;
 
 import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;

@@ -1,25 +1,24 @@
-package taskscheduler.requests;
+package pt.uminho.di.taskscheduler.requests;
 
 import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
 
-public class FinalizeTaskRep implements CatalystSerializable {
+public class FinalizeTaskReq implements CatalystSerializable {
+    public String finalizedTaskUrl;
 
-    public boolean success;
-
-    public FinalizeTaskRep(boolean success) {
-        this.success = success;
+    public FinalizeTaskReq(String finalizedTask) {
+        this.finalizedTaskUrl = finalizedTask;
     }
 
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
-        bufferOutput.writeBoolean(success);
+        bufferOutput.writeString(finalizedTaskUrl);
     }
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
-        this.success = bufferInput.readBoolean();
+        this.finalizedTaskUrl = bufferInput.readString();
     }
 }

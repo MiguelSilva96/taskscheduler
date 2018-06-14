@@ -1,4 +1,4 @@
-package taskscheduler.common;
+package pt.uminho.di.taskscheduler.common;
 
 public interface Scheduler {
 

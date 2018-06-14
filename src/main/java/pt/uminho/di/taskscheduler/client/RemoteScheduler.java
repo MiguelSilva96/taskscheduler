@@ -1,4 +1,4 @@
-package taskscheduler.client;
+package pt.uminho.di.taskscheduler.client;
 
 import io.atomix.catalyst.concurrent.SingleThreadContext;
 import io.atomix.catalyst.serializer.Serializer;
@@ -6,9 +6,9 @@ import pt.haslab.ekit.Spread;
 import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
-import taskscheduler.common.Scheduler;
-import taskscheduler.common.Task;
-import taskscheduler.requests.*;
+import pt.uminho.di.taskscheduler.common.Scheduler;
+import pt.uminho.di.taskscheduler.common.Task;
+import pt.uminho.di.taskscheduler.requests.*;
 
 import java.util.concurrent.CompletableFuture;
 

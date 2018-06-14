@@ -1,10 +1,10 @@
-package taskscheduler.requests;
+package pt.uminho.di.taskscheduler.requests;
 
 import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
-import taskscheduler.common.Task;
+import pt.uminho.di.taskscheduler.common.Task;
 
 public class NextTaskRep implements CatalystSerializable {
 
