@@ -46,15 +46,15 @@ public class SchedulerImpl {
     }
 
     public boolean finalizeTask(String client, String url) {
-	    Map<String, Task> clientTasks = assignedTasks.get(client);
-	 	if (clientTasks == null)
-	 	    return false;
+        Map<String, Task> clientTasks = assignedTasks.get(client);
+        if (clientTasks == null)
+            return false;
 
-	 	Task task = clientTasks.get(url);
-	 	if (task == null)
-	 	    return false;
+        Task task = clientTasks.get(url);
+        if (task == null)
+            return false;
 
-	 	clientTasks.remove(url);
-	 	return true;
+        clientTasks.remove(url);
+        return true;
     }
 }
