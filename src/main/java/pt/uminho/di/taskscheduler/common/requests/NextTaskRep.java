@@ -1,22 +1,28 @@
-package pt.uminho.di.taskscheduler.requests;
+package pt.uminho.di.taskscheduler.common.requests;
 
 import io.atomix.catalyst.buffer.BufferInput;
 import io.atomix.catalyst.buffer.BufferOutput;
 import io.atomix.catalyst.serializer.CatalystSerializable;
 import io.atomix.catalyst.serializer.Serializer;
+import pt.uminho.di.taskscheduler.common.Task;
 
-public class NewTaskReq implements CatalystSerializable {
-    public String task;
-    public NewTaskReq(String task){
+public class NextTaskRep implements CatalystSerializable {
+
+    public Task task;
+
+    public NextTaskRep() { }
+
+    public NextTaskRep(Task task) {
         this.task = task;
     }
+
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
-        bufferOutput.writeString(task);
+        serializer.writeObject(task, bufferOutput);
     }
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
-        this.task = bufferInput.readString();
+        task = serializer.readObject(bufferInput);
     }
 }

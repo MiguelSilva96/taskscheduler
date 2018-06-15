@@ -12,11 +12,11 @@ public class Client {
         int clientId = Integer.parseInt(args[0]);
         String groupName = args[1];
         RemoteScheduler scheduler = new RemoteScheduler(clientId, groupName);
-        scheduler.addsNewTask("dar banho ao baião");
-        Task taskToDo = scheduler.getTask();
+        scheduler.addNewTask("dar banho ao baião");
+        Task taskToDo = scheduler.getTask("");
         tasks.put(taskToDo.getName(), taskToDo);
         System.out.println(taskToDo.getName());
-        scheduler.setFinalizedTask(taskToDo.getUrl());
+        scheduler.setFinalizedTask("", taskToDo.getUrl());
         scheduler.exit();
     }
 

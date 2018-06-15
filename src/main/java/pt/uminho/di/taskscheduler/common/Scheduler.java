@@ -2,7 +2,7 @@ package pt.uminho.di.taskscheduler.common;
 
 public interface Scheduler {
 
-    boolean addsNewTask(String task);
-    Task getTask();
-    boolean setFinalizedTask(String finalizedTask);
+    boolean addNewTask(String task);
+    Task getTask(String client);
+    boolean setFinalizedTask(String client, String finalizedTask);
 }

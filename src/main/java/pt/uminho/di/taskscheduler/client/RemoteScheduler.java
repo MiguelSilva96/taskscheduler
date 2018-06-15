@@ -1,14 +1,15 @@
 package pt.uminho.di.taskscheduler.client;
 
+import pt.uminho.di.taskscheduler.common.Scheduler;
+import pt.uminho.di.taskscheduler.common.Task;
+import pt.uminho.di.taskscheduler.common.requests.*;
+
 import io.atomix.catalyst.concurrent.SingleThreadContext;
 import io.atomix.catalyst.serializer.Serializer;
 import pt.haslab.ekit.Spread;
 import spread.SpreadException;
 import spread.SpreadGroup;
 import spread.SpreadMessage;
-import pt.uminho.di.taskscheduler.common.Scheduler;
-import pt.uminho.di.taskscheduler.common.Task;
-import pt.uminho.di.taskscheduler.requests.*;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -20,7 +21,7 @@ public class RemoteScheduler implements Scheduler {
     private SpreadGroup group;
 
     public RemoteScheduler(int clientId, String groupName) {
-        this.tc = new SingleThreadContext("proto-%d", new Serializer());
+        this.tc = new SingleThreadContext("proc-%d", new Serializer());
         this.groupName = groupName;
         register();
         comp = null;
@@ -59,7 +60,7 @@ public class RemoteScheduler implements Scheduler {
     }
 
 
-    public boolean addsNewTask(String task) {
+    public boolean addNewTask(String task) {
         NewTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
@@ -75,7 +76,7 @@ public class RemoteScheduler implements Scheduler {
         return rep.success;
     }
 
-    public Task getTask() {
+    public Task getTask(String client) {
         NextTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
@@ -91,7 +92,7 @@ public class RemoteScheduler implements Scheduler {
         return rep.task;
     }
 
-    public boolean setFinalizedTask(String finalizedTask) {
+    public boolean setFinalizedTask(String client, String finalizedTask) {
         FinalizeTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();

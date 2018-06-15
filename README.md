@@ -1,2 +1,2 @@
-# pt.uminho.di.taskscheduler
+# Task Scheduler
 Reliable Distributed Task Scheduler
