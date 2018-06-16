@@ -8,20 +8,24 @@ import io.atomix.catalyst.serializer.Serializer;
 public class FinalizeTaskRep implements CatalystSerializable {
 
     public boolean success;
+    public int request;
 
     public FinalizeTaskRep() { }
 
-    public FinalizeTaskRep(boolean success) {
+    public FinalizeTaskRep(boolean success, int request) {
         this.success = success;
+        this.request = request;
     }
 
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
         bufferOutput.writeBoolean(success);
+        bufferOutput.writeInt(request);
     }
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
         this.success = bufferInput.readBoolean();
+        this.request = bufferInput.readInt();
     }
 }

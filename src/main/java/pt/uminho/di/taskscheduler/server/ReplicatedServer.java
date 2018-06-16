@@ -52,28 +52,28 @@ public class ReplicatedServer {
         tc.serializer().register(StateRep.class);
     }
 
-    public void handleNewTask(SpreadMessage m, NewTaskReq v) {
+    private void handleNewTask(SpreadMessage m, NewTaskReq v) {
         boolean res = scheduler.addNewTask(v.task);
-        NewTaskRep rep = new NewTaskRep(res);
+        NewTaskRep rep = new NewTaskRep(res, v.request);
         SpreadMessage m2 = new SpreadMessage();
         m2.addGroup(m.getSender());
         m2.setReliable();
         spread.multicast(m2, rep);
     }
 
-    public void handleNextTask(SpreadMessage m, NextTaskReq v) {
+    private void handleNextTask(SpreadMessage m, NextTaskReq v) {
         Task task = scheduler.getTask(m.getSender().toString());
-        NextTaskRep rep = new NextTaskRep(task);
+        NextTaskRep rep = new NextTaskRep(task, v.request);
         SpreadMessage m2 = new SpreadMessage();
         m2.addGroup(m.getSender());
         m2.setReliable();
         spread.multicast(m2, rep);
     }
 
-    public void handleFinalizeTask(SpreadMessage m, FinalizeTaskReq v) {
+    private void handleFinalizeTask(SpreadMessage m, FinalizeTaskReq v) {
         String client = m.getSender().toString();
         boolean res = scheduler.setFinalizedTask(client, v.finalizedTaskUrl);
-        FinalizeTaskRep rep = new FinalizeTaskRep(res);
+        FinalizeTaskRep rep = new FinalizeTaskRep(res, v.request);
         SpreadMessage m2 = new SpreadMessage();
         m2.addGroup(m.getSender());
         m2.setReliable();
@@ -85,7 +85,7 @@ public class ReplicatedServer {
         spread.handler(NextTaskReq.class, this::handleNextTask);
         spread.handler(FinalizeTaskReq.class, this::handleFinalizeTask);
         spread.handler(StateReq.class, (m, v) -> {
-            StateRep state = new StateRep();
+            StateRep state = new StateRep((SchedulerImpl) scheduler);
             SpreadMessage m2 = new SpreadMessage();
             m2.addGroup(m.getSender());
             m2.setAgreed();
@@ -94,15 +94,24 @@ public class ReplicatedServer {
     }
 
     private void stateHandlers(List<RequestInfo> requests) {
-        spread.handler(NewTaskReq.class, (m, v) ->
-            requests.add(new RequestInfo(m, v))
-        );
-        spread.handler(NextTaskReq.class, (m, v) ->
-            requests.add(new RequestInfo(m, v))
-        );
-        spread.handler(FinalizeTaskReq.class, (m, v) ->
-            requests.add(new RequestInfo(m, v))
-        );
+        spread.handler(StateReq.class, (m, v) -> {
+            /*
+               Lets check if this is our request,
+               if it is, that means we need to start saving
+               all the requests to execute after state transfer
+            */
+            if(m.getSender().equals(spread.getPrivateGroup())) {
+                spread.handler(NewTaskReq.class, (m2, v2) ->
+                        requests.add(new RequestInfo(m2, v2))
+                );
+                spread.handler(NextTaskReq.class, (m2, v2) ->
+                        requests.add(new RequestInfo(m2, v2))
+                );
+                spread.handler(FinalizeTaskReq.class, (m2, v2) ->
+                        requests.add(new RequestInfo(m2, v2))
+                );
+            }
+        });
         spread.handler(StateRep.class, (m, v) -> {
             /* This is temporary, implement fragmented state transfer */
             this.scheduler = v.scheduler;
@@ -141,6 +150,14 @@ public class ReplicatedServer {
                 }
                 spread.open().thenRun(() -> System.out.println("starting")).get();
                 spread.join(SERVER_GROUP);
+                spread.join(CLIENT_GROUP);
+                if(myId != 0) {
+                    StateReq sr = new StateReq();
+                    SpreadMessage m = new SpreadMessage();
+                    m.addGroup(SERVER_GROUP);
+                    m.setAgreed();
+                    spread.multicast(m, sr);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

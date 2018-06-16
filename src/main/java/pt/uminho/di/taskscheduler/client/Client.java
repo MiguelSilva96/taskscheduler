@@ -1,5 +1,6 @@
 package pt.uminho.di.taskscheduler.client;
 
+
 import pt.uminho.di.taskscheduler.common.Task;
 
 import java.util.HashMap;
@@ -17,8 +18,6 @@ public class Client {
         tasks.put(taskToDo.getName(), taskToDo);
         System.out.println(taskToDo.getName());
         scheduler.setFinalizedTask("", taskToDo.getUrl());
-        scheduler.exit();
+        scheduler.close();
     }
-
-
 }
