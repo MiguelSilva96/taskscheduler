@@ -7,22 +7,19 @@ import io.atomix.catalyst.serializer.Serializer;
 import pt.uminho.di.taskscheduler.common.Scheduler;
 import pt.uminho.di.taskscheduler.common.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /* This is temporary, state transfer has to be fragmented */
 public class SchedulerImpl implements CatalystSerializable, Scheduler {
 
-    private List<Task> nextTasks;
+    private TreeSet<Task> nextTasks;
     private Map<String, Map<String, Task>> assignedTasks;
     private AtomicInteger taskIds;
 
     public SchedulerImpl() {
         taskIds = new AtomicInteger(0);
-        nextTasks = new ArrayList<>();
+        nextTasks = new TreeSet<>();
         assignedTasks = new HashMap<>();
     }
 
@@ -38,7 +35,7 @@ public class SchedulerImpl implements CatalystSerializable, Scheduler {
         if (nextTasks.size() == 0)
             return null;
 
-        Task task = nextTasks.get(0);
+        Task task = nextTasks.pollFirst();
         Map<String, Task> clientTasks = assignedTasks.get(client);
 
         if (clientTasks == null) {
@@ -47,7 +44,6 @@ public class SchedulerImpl implements CatalystSerializable, Scheduler {
         }
 
         clientTasks.put(task.getUrl(), task);
-        nextTasks.remove(0);
         return task;
     }
 
@@ -65,7 +61,10 @@ public class SchedulerImpl implements CatalystSerializable, Scheduler {
     }
 
     public void freeClientAssignedTasks(String client) {
-
+        Map<String, Task> tasks = assignedTasks.get(client);
+        for(Task t : tasks.values()){
+            nextTasks.add(t);
+        }
     }
 
     @Override
@@ -87,7 +86,7 @@ public class SchedulerImpl implements CatalystSerializable, Scheduler {
 
     @Override
     public void readObject(BufferInput<?> bufferInput, Serializer serializer) {
-        nextTasks = new ArrayList<>();
+        nextTasks = new TreeSet<>();
         assignedTasks = new HashMap<>();
 
         int size = bufferInput.readInt();
