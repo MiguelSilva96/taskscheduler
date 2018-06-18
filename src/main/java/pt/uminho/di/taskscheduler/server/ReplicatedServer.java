@@ -8,7 +8,9 @@ import pt.uminho.di.taskscheduler.server.requests.*;
 import io.atomix.catalyst.concurrent.SingleThreadContext;
 import io.atomix.catalyst.serializer.Serializer;
 import pt.haslab.ekit.Spread;
+import spread.MembershipInfo;
 import spread.SpreadException;
+import spread.SpreadGroup;
 import spread.SpreadMessage;
 
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ public class ReplicatedServer {
     private SingleThreadContext tc;
     private CompletableFuture<StateRep> stateTransfer;
     private int myId;
+    private boolean imLeader;
 
     public ReplicatedServer(int serverId) {
         tc = new SingleThreadContext("proc-%d", new Serializer());
@@ -38,6 +41,7 @@ public class ReplicatedServer {
             System.out.println(se.getMessage());
         }
         this.myId = serverId;
+        this.imLeader = false;
         register();
     }
 
@@ -132,12 +136,68 @@ public class ReplicatedServer {
             FinalizeTaskReq req = (FinalizeTaskReq) reqInfo.request;
             handleFinalizeTask(reqInfo.messageInfo, req);
         }
+        else if(reqInfo.request instanceof MembershipInfo) {
+
+        }
+    }
+
+    private void handleClientMembership(MembershipInfo mInfo) {
+        /*
+           Not checking if it was a server because:
+           If it is a server that left we can do the same process
+           because there won't be tasks for the server, so nothing
+           bad will happen. It also doesn't impact the performance
+           that much because it just checks if that "client" has
+           tasks in a map (~=O(1)) and a server will never have.
+        */
+        String client = "";
+
+        if(mInfo.isCausedByDisconnect())
+            client = mInfo.getDisconnected().toString();
+        else if(mInfo.isCausedByLeave())
+            client = mInfo.getLeft().toString();
+        // Still needs to handle network partition
+        else return;
+
+        SpreadMessage m = new SpreadMessage();
+        m.addGroup(SERVER_GROUP);
+        m.setAgreed();
+        spread.multicast(m, new ClientLeft(client));
+    }
+
+    private void leaderElection() {
+
+    }
+
+    private void handleServerMembership(MembershipInfo mInfo) {
+        if(mInfo.isCausedByJoin());
+        else if(mInfo.isCausedByLeave()) {
+            // remove from server list
+            leaderElection();
+        }
+    }
+
+    private void membershipHandler() {
+        spread.handler(MembershipInfo.class, (m, v) -> {
+            if(v.isRegularMembership()) {
+                String group;
+                group = v.getGroup().toString();
+                if (group.equals(CLIENT_GROUP) && imLeader)
+                    handleClientMembership(v);
+                else
+                    handleServerMembership(v);
+            }
+        });
     }
 
     public void start() {
         tc.execute(() -> {
             try {
-                if(myId == 0) runningHandlers();
+                membershipHandler();
+                if (myId == 0) {
+                    runningHandlers();
+                    this.imLeader = true;
+                }
                 else {
                     List<RequestInfo> requests = new ArrayList<>();
                     stateTransfer = new CompletableFuture<>();
@@ -148,10 +208,12 @@ public class ReplicatedServer {
                             handleRequest(r);
                     });
                 }
+
                 spread.open().thenRun(() -> System.out.println("starting")).get();
                 spread.join(SERVER_GROUP);
                 spread.join(CLIENT_GROUP);
-                if(myId != 0) {
+
+                if (myId != 0) {
                     StateReq sr = new StateReq();
                     SpreadMessage m = new SpreadMessage();
                     m.addGroup(SERVER_GROUP);

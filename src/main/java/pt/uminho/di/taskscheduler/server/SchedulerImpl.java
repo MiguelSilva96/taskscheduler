@@ -64,6 +64,10 @@ public class SchedulerImpl implements CatalystSerializable, Scheduler {
         return true;
     }
 
+    public void freeClientAssignedTasks(String client) {
+
+    }
+
     @Override
     public void writeObject(BufferOutput<?> bufferOutput, Serializer serializer) {
         bufferOutput.writeInt(nextTasks.size());
