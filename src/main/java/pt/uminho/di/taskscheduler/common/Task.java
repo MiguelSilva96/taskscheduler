@@ -10,6 +10,8 @@ public class Task implements CatalystSerializable, Comparable<Task> {
     private String name;
     private String url;
 
+    public Task () { }
+
     public Task (String name, String url) {
         this.name = name;
         this.url = url;

@@ -1,5 +1,6 @@
 package pt.uminho.di.taskscheduler.client;
 
+import pt.uminho.di.taskscheduler.common.Constants;
 import pt.uminho.di.taskscheduler.common.Scheduler;
 import pt.uminho.di.taskscheduler.common.Task;
 import pt.uminho.di.taskscheduler.common.requests.*;
@@ -20,13 +21,11 @@ public class RemoteScheduler implements Scheduler {
     private SingleThreadContext tc;
     private Spread spread;
     private CompletableFuture<Object> comp;
-    private String serverGroup;
     private SpreadGroup group;
     private int request;
 
     public RemoteScheduler(int clientId) {
         this.tc = new SingleThreadContext("proc-%d", new Serializer());
-        this.serverGroup = "srv_group";
         register();
         comp = null;
         request = 0;
@@ -37,22 +36,28 @@ public class RemoteScheduler implements Scheduler {
         }
         handlers();
         tc.execute(() ->
-            spread.open().thenRun(() -> group = spread.join("cli_group"))
+            spread.open().thenRun(() -> group = spread.join(Constants.CLIENT_GROUP))
         );
     }
 
     private void handlers() {
         spread.handler(NewTaskRep.class, (m, v) -> {
-            if (request == v.request && comp != null)
+            if (request == v.request && comp != null) {
                 comp.complete(v);
+                comp = null;
+            }
         });
         spread.handler(NextTaskRep.class, (m, v) -> {
-            if (request == v.request && comp != null)
+            if (request == v.request && comp != null) {
                 comp.complete(v);
+                comp = null;
+            }
         });
         spread.handler(FinalizeTaskRep.class, (m, v) -> {
-           if (request == v.request && comp != null)
+           if (request == v.request && comp != null) {
                comp.complete(v);
+               comp = null;
+           }
         });
     }
 
@@ -70,7 +75,7 @@ public class RemoteScheduler implements Scheduler {
         NewTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
-        m.addGroup(serverGroup);
+        m.addGroup(Constants.SERVER_GROUP);
         m.setAgreed();
         spread.multicast(m, new NewTaskReq(task, ++request));
         try {
@@ -85,7 +90,7 @@ public class RemoteScheduler implements Scheduler {
         NextTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
-        m.addGroup(serverGroup);
+        m.addGroup(Constants.SERVER_GROUP);
         m.setAgreed();
         spread.multicast(m, new NextTaskReq(++request));
         try {
@@ -100,7 +105,7 @@ public class RemoteScheduler implements Scheduler {
         FinalizeTaskRep rep = null;
         comp = new CompletableFuture<>();
         SpreadMessage m = new SpreadMessage();
-        m.addGroup(serverGroup);
+        m.addGroup(Constants.SERVER_GROUP);
         m.setAgreed();
         spread.multicast(m, new FinalizeTaskReq(finalizedTask, ++request));
         try {
